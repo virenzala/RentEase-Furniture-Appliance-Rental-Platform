@@ -1,8 +1,8 @@
 # RentEase Deployment Guide
 
 This guide explains how to deploy the **RentEase - Furniture & Appliance Rental Platform** for free using two options:
-*   **Option 1:** Frontend on Netlify + Backend on Vercel (Recommended)
-*   **Option 2:** Both Frontend and Backend on Vercel (100% Free)
+*   **Option 1:** Frontend on Netlify + Backend on Vercel (Recommended separate setup)
+*   **Option 2:** Both Frontend and Backend on a Single Vercel Project (Recommended for single-domain / no CORS)
 
 ---
 
@@ -31,27 +31,7 @@ Since Vercel's serverless environment is stateless and read-only, the local `db.
 
 ---
 
-## ⚡ Step 2: Deploy the Backend to Vercel (Free)
-
-The Express backend is preconfigured for Vercel using the [backend/vercel.json](file:///c:/Users/hp/OneDrive/Desktop/RentEase%20%E2%80%93%20Furniture%20&%20Appliance%20Rental%20Platform/backend/vercel.json) file.
-
-1.  Push your code repository to **GitHub**.
-2.  Log in to **Vercel** and click **Add New > Project**.
-3.  Import your RentEase repository.
-4.  In the project configuration:
-    *   **Project Name:** `rentease-backend`
-    *   **Framework Preset:** Select **Other** (since it's a sub-directory Express app).
-    *   **Root Directory:** Edit and select **`backend`**.
-5.  Expand the **Environment Variables** section and add:
-    *   `MONGODB_URI`: *Your MongoDB Atlas connection string from Step 1.*
-    *   `JWT_SECRET`: *A secure random string (e.g., `5f8d9b23...`).*
-    *   `NODE_ENV`: `production`
-6.  Click **Deploy**. Once completed, Vercel will provide you with a deployment URL (e.g., `https://rentease-backend.vercel.app`).
-7.  Verify the backend is live by visiting `https://your-backend.vercel.app/api/health` in your browser. You should receive a status response: `{"status":"healthy","message":"RentEase Full-Stack Backend..."}`.
-
----
-
-## 🌱 Step 3: Seed the Production Database
+## 🌱 Step 2: Seed the Production Database
 
 To populate your live MongoDB Atlas catalog with default furniture & appliances:
 
@@ -70,49 +50,45 @@ To populate your live MongoDB Atlas catalog with default furniture & appliances:
 
 ---
 
-## 🌐 Step 4: Deploy the Frontend (Select Option A or B)
+## 📦 Option A: Single Vercel Project (Multi-Service Monorepos)
+This is the easiest and most modern deployment route. Both the Next.js frontend and Express backend are deployed to a single Vercel project on the **same domain**. This uses the [vercel.json](file:///c:/Users/hp/OneDrive/Desktop/RentEase%20%E2%80%93%20Furniture%20&%20Appliance%20Rental%20Platform/vercel.json) file created in the workspace root.
 
-Both hosting options are completely **100% Free** on their Hobby/Starter plans.
+1.  Push your code repository to **GitHub**.
+2.  Log in to **Vercel** and click **Add New > Project**.
+3.  Import your RentEase repository.
+4.  In the project configuration:
+    *   **Project Name:** `rent-ease-furniture-appliance-rental-platform`
+    *   **Root Directory:** Select **`./`** (the workspace root containing the `vercel.json` file).
+    *   Vercel will read the root `vercel.json` and automatically detect the **Frontend** service (Next.js) and the **Backend** service (Express).
+5.  In the **Environment Variables** section of the project, add:
+    *   `MONGODB_URI`: *Your MongoDB Atlas connection string from Step 1.*
+    *   `JWT_SECRET`: `rentease_super_secret_jwt_key_2026`
+    *   `NEXT_PUBLIC_API_URL`: `/_/backend/api`  *(Since both run on the same domain, a relative URL is fully supported and eliminates CORS issues!)*
+6.  Click **Deploy**.
+7.  Vercel will deploy:
+    *   The frontend website at the root (`/`).
+    *   The Express API routes at the prefix path (`/_/backend`).
 
-### Option A: Deploy Frontend on Netlify (Recommended)
-This uses the preconfigured [netlify.toml](file:///c:/Users/hp/OneDrive/Desktop/RentEase%20%E2%80%93%20Furniture%20&%20Appliance%20Rental%20Platform/netlify.toml) file in the root.
+---
 
-1.  Log in to **Netlify** and click **Add new site > Import an existing project**.
-2.  Select your git provider (GitHub) and authorize.
-3.  Choose your RentEase repository.
-4.  Netlify will automatically read the [netlify.toml](file:///c:/Users/hp/OneDrive/Desktop/RentEase%20%E2%80%93%20Furniture%20&%20Appliance%20Rental%20Platform/netlify.toml) file. Double-check that these fields match:
+## ⚡ Option B: Frontend on Netlify + Separate Backend on Vercel
+If you prefer to split the hosting providers:
+
+### 1. Deploy the Backend to Vercel
+1.  Log in to **Vercel** and click **Add New > Project**.
+2.  Import your repository.
+3.  Set the **Root Directory** to **`backend`** and select framework preset **Other**.
+4.  Add environment variables:
+    *   `MONGODB_URI`: *Your MongoDB Atlas connection string.*
+    *   `JWT_SECRET`: `rentease_super_secret_jwt_key_2026`
+5.  Deploy and copy the deployed URL (e.g., `https://rentease-backend.vercel.app`).
+
+### 2. Deploy the Frontend to Netlify
+1.  Log in to **Netlify** and import the repository.
+2.  It will read [netlify.toml](file:///c:/Users/hp/OneDrive/Desktop/RentEase%20%E2%80%93%20Furniture%20&%20Appliance%20Rental%20Platform/netlify.toml) automatically:
     *   **Base directory:** `frontend`
     *   **Build command:** `npm run build`
     *   **Publish directory:** `.next`
-5.  Expand **Advanced build settings > Environment variables** and add:
-    *   `NEXT_PUBLIC_API_URL`: `https://your-backend.vercel.app/api`
-        *(Replace `your-backend.vercel.app` with your actual Vercel backend URL, and ensure it ends with `/api`)*
-6.  Click **Deploy site**.
-
----
-
-### Option B: Deploy Frontend on Vercel (Alternative - 100% Free)
-Since Next.js is developed by Vercel, it runs exceptionally well here on their free Hobby plan.
-
-1.  Log in to your **Vercel** dashboard and click **Add New > Project**.
-2.  Import your RentEase repository again (this creates a second project separate from your backend).
-3.  In the project configuration:
-    *   **Project Name:** `rentease-frontend`
-    *   **Framework Preset:** Select **Next.js**.
-    *   **Root Directory:** Edit and select **`frontend`**.
-4.  Expand the **Environment Variables** section and add:
-    *   `NEXT_PUBLIC_API_URL`: `https://your-backend.vercel.app/api`
-        *(Replace `your-backend.vercel.app` with your Vercel backend URL, and ensure it ends with `/api`)*
-5.  Click **Deploy**.
-6.  Once completed, Vercel will provide you with your public website URL (e.g., `https://rentease-frontend.vercel.app`).
-
----
-
-## 🔍 Step 5: Verification & Testing
-
-1.  Open your deployed Netlify or Vercel frontend URL.
-2.  Try signing in using one of the preloaded credentials:
-    *   **Customer Role:** `user@rentease.com` (password: `user123`)
-    *   **Admin Role:** `admin@rentease.com` (password: `admin123`)
-3.  Navigate through the catalog, view products, and test a rental checkout.
-4.  Open the browser developer tools (F12) and inspect the **Network** tab to confirm all requests (e.g., `/products`, `/auth/login`) are pointing to your Vercel backend URL.
+3.  Add the environment variable:
+    *   `NEXT_PUBLIC_API_URL`: `https://your-backend-project.vercel.app/api` *(Make sure to append `/api`)*
+4.  Deploy.
