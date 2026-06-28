@@ -1,6 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 const { MongoClient } = require('mongodb');
+const dns = require('dns');
+
+// Configure DNS to bypass local router lookup failures for Atlas SRV
+dns.setServers(['8.8.8.8', '1.1.1.1']);
+
+// Load environment variables relative to this config directory
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const DB_FILE = path.join(__dirname, '../data/db.json');
 const isMongo = !!process.env.MONGODB_URI;
