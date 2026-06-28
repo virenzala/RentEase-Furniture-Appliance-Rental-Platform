@@ -85,7 +85,7 @@ class Model {
         return await col.find(query).toArray();
       } catch (err) {
         console.error(`MongoDB find error in ${this.collectionName}:`, err);
-        return [];
+        throw err;
       }
     }
 
@@ -120,7 +120,7 @@ class Model {
         return await col.findOne(query);
       } catch (err) {
         console.error(`MongoDB findOne error in ${this.collectionName}:`, err);
-        return null;
+        throw err;
       }
     }
     const items = await this.find(query);
@@ -135,7 +135,7 @@ class Model {
         return await col.findOne({ _id: id });
       } catch (err) {
         console.error(`MongoDB findById error in ${this.collectionName}:`, err);
-        return null;
+        throw err;
       }
     }
     const db = readDb();
