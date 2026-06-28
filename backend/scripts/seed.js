@@ -246,8 +246,10 @@ async function seed() {
     
     console.log(`✅ Loaded ${sampleProducts.length} default furniture & appliances into catalog.`);
     console.log(`🎉 Database seeding finished successfully!`);
+    process.exit(0);
   } catch (error) {
     console.error('❌ Database seeding failed:', error);
+    process.exit(1);
   }
 }
 
