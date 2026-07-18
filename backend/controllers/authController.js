@@ -37,6 +37,10 @@ const registerUser = async (req, res) => {
       role: role || 'user', // 'user' | 'vendor' | 'admin'
       phone: phone || '',
       address: address || '',
+      avatar: '',
+      bio: '',
+      gender: '',
+      dob: ''
     });
 
     res.status(201).json({
@@ -46,6 +50,10 @@ const registerUser = async (req, res) => {
       role: newUser.role,
       phone: newUser.phone,
       address: newUser.address,
+      avatar: newUser.avatar,
+      bio: newUser.bio,
+      gender: newUser.gender,
+      dob: newUser.dob,
       token: generateToken(newUser._id)
     });
   } catch (error) {
@@ -81,8 +89,12 @@ const loginUser = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      phone: user.phone,
-      address: user.address,
+      phone: user.phone || '',
+      address: user.address || '',
+      avatar: user.avatar || '',
+      bio: user.bio || '',
+      gender: user.gender || '',
+      dob: user.dob || '',
       token: generateToken(user._id)
     });
   } catch (error) {
@@ -103,8 +115,12 @@ const getUserProfile = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        phone: user.phone,
-        address: user.address,
+        phone: user.phone || '',
+        address: user.address || '',
+        avatar: user.avatar || '',
+        bio: user.bio || '',
+        gender: user.gender || '',
+        dob: user.dob || '',
         createdAt: user.createdAt
       });
     } else {
@@ -126,11 +142,19 @@ const updateUserProfile = async (req, res) => {
       const name = req.body.name || user.name;
       const phone = req.body.phone !== undefined ? req.body.phone : user.phone;
       const address = req.body.address !== undefined ? req.body.address : user.address;
+      const avatar = req.body.avatar !== undefined ? req.body.avatar : user.avatar;
+      const bio = req.body.bio !== undefined ? req.body.bio : user.bio;
+      const gender = req.body.gender !== undefined ? req.body.gender : user.gender;
+      const dob = req.body.dob !== undefined ? req.body.dob : user.dob;
       
       const updatedUser = await User.findByIdAndUpdate(req.user._id, {
         name,
         phone,
-        address
+        address,
+        avatar,
+        bio,
+        gender,
+        dob
       });
 
       res.json({
@@ -138,8 +162,12 @@ const updateUserProfile = async (req, res) => {
         name: updatedUser.name,
         email: updatedUser.email,
         role: updatedUser.role,
-        phone: updatedUser.phone,
-        address: updatedUser.address,
+        phone: updatedUser.phone || '',
+        address: updatedUser.address || '',
+        avatar: updatedUser.avatar || '',
+        bio: updatedUser.bio || '',
+        gender: updatedUser.gender || '',
+        dob: updatedUser.dob || '',
         createdAt: updatedUser.createdAt
       });
     } else {

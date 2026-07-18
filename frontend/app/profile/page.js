@@ -15,8 +15,19 @@ import {
   X, 
   Loader2, 
   CheckCircle2, 
-  AlertCircle 
+  AlertCircle,
+  FileText,
+  UserCheck,
+  Camera
 } from 'lucide-react';
+
+const PRESETS = [
+  { name: 'Sofia', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80' },
+  { name: 'Alex', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80' },
+  { name: 'Emily', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80' },
+  { name: 'Marcus', url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&h=150&q=80' },
+  { name: 'Zoe', url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&h=150&q=80' }
+];
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -28,13 +39,19 @@ export default function ProfilePage() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [avatar, setAvatar] = useState('');
+  const [bio, setBio] = useState('');
+  const [gender, setGender] = useState('');
+  const [dob, setDob] = useState('');
+  
+  // Interaction State
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [customAvatarToggle, setCustomAvatarToggle] = useState(false);
 
   async function fetchProfile() {
     setLoading(true);
     try {
-      // Check if user is logged in
       const currentUser = authService.getCurrentUser();
       if (!currentUser) {
         router.push('/login');
@@ -46,6 +63,16 @@ export default function ProfilePage() {
       setName(data.name || '');
       setPhone(data.phone || '');
       setAddress(data.address || '');
+      setAvatar(data.avatar || '');
+      setBio(data.bio || '');
+      setGender(data.gender || '');
+      
+      // Format DOB (YYYY-MM-DD) for date input
+      if (data.dob) {
+        setDob(data.dob.substring(0, 10));
+      } else {
+        setDob('');
+      }
     } catch (err) {
       console.error('Error fetching profile:', err);
       setMessage({ type: 'error', text: 'Failed to load profile details.' });
@@ -64,12 +91,19 @@ export default function ProfilePage() {
     setMessage({ type: '', text: '' });
     
     try {
-      const updated = await authService.updateProfile({ name, phone, address });
+      const updated = await authService.updateProfile({ 
+        name, 
+        phone, 
+        address, 
+        avatar,
+        bio,
+        gender,
+        dob
+      });
       setProfile(updated);
       setEditMode(false);
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
       
-      // Auto clear success message after 3 seconds
       setTimeout(() => {
         setMessage({ type: '', text: '' });
       }, 3000);
@@ -86,8 +120,17 @@ export default function ProfilePage() {
       setName(profile.name || '');
       setPhone(profile.phone || '');
       setAddress(profile.address || '');
+      setAvatar(profile.avatar || '');
+      setBio(profile.bio || '');
+      setGender(profile.gender || '');
+      if (profile.dob) {
+        setDob(profile.dob.substring(0, 10));
+      } else {
+        setDob('');
+      }
     }
     setEditMode(false);
+    setCustomAvatarToggle(false);
     setMessage({ type: '', text: '' });
   };
 
@@ -116,7 +159,7 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      {/* Notifications/Feedback */}
+      {/* Notifications */}
       {message.text && (
         <div className={`mb-6 p-4 rounded-2xl flex items-center gap-3 border ${
           message.type === 'success' 
@@ -132,23 +175,33 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Premium Profile Glassmorphic Card */}
+      {/* Profile Card */}
       <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-3xl border border-slate-200/50 dark:border-slate-800/50 overflow-hidden shadow-xl shadow-slate-100/50 dark:shadow-none">
         
-        {/* Card Header Profile Banner */}
+        {/* Banner */}
         <div className="h-32 bg-gradient-to-r from-teal-500 to-indigo-600 relative">
           <div className="absolute -bottom-12 left-8">
-            <div className="w-24 h-24 rounded-3xl bg-gradient-to-tr from-teal-400 to-indigo-500 text-white font-bold flex items-center justify-center text-4xl shadow-lg border-4 border-white dark:border-slate-800">
-              {initials}
-            </div>
+            {profile.avatar ? (
+              <img 
+                src={profile.avatar} 
+                alt={profile.name} 
+                className="w-24 h-24 rounded-3xl object-cover shadow-lg border-4 border-white dark:border-slate-800"
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-3xl bg-gradient-to-tr from-teal-400 to-indigo-500 text-white font-bold flex items-center justify-center text-4xl shadow-lg border-4 border-white dark:border-slate-800">
+                {initials}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Card Content */}
+        {/* Content Body */}
         <div className="pt-16 pb-8 px-8">
+          
+          {/* Header row */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 dark:border-slate-700/50 pb-6 mb-6">
-            <div>
-              <h2 className="font-outfit font-bold text-2xl text-slate-800 dark:text-white">
+            <div className="max-w-[70%]">
+              <h2 className="font-outfit font-bold text-2xl text-slate-800 dark:text-white truncate">
                 {profile.name}
               </h2>
               <p className="text-slate-500 dark:text-slate-400 text-sm flex items-center gap-1.5 mt-0.5 font-medium">
@@ -168,8 +221,65 @@ export default function ProfilePage() {
           </div>
 
           {editMode ? (
-            /* Editing Form Mode */
+            /* ==================== EDIT MODE FORM ==================== */
             <form onSubmit={handleUpdate} className="space-y-6">
+              
+              {/* Avatar Picker Section */}
+              <div className="p-5 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-700/60 rounded-3xl space-y-4">
+                <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                  <Camera className="w-5 h-5 text-teal-600" />
+                  <span className="font-bold text-sm">Choose Profile Picture</span>
+                </div>
+                
+                {/* Preset Circles */}
+                <div className="flex flex-wrap items-center gap-4">
+                  {PRESETS.map((p) => (
+                    <button
+                      key={p.name}
+                      type="button"
+                      onClick={() => {
+                        setAvatar(p.url);
+                        setCustomAvatarToggle(false);
+                      }}
+                      className={`relative w-14 h-14 rounded-full overflow-hidden border-2 transition-all hover:scale-105 ${
+                        avatar === p.url 
+                          ? 'border-teal-500 ring-2 ring-teal-500/30' 
+                          : 'border-transparent opacity-80 hover:opacity-100'
+                      }`}
+                    >
+                      <img src={p.url} alt={p.name} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                  
+                  {/* Custom Toggle Button */}
+                  <button
+                    type="button"
+                    onClick={() => setCustomAvatarToggle(!customAvatarToggle)}
+                    className={`px-4 py-2 text-xs font-bold rounded-full border transition-all ${
+                      customAvatarToggle 
+                        ? 'bg-teal-50 border-teal-200 text-teal-700 dark:bg-teal-950/20 dark:border-teal-850 dark:text-teal-400' 
+                        : 'bg-white border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'
+                    }`}
+                  >
+                    Custom URL
+                  </button>
+                </div>
+
+                {/* Custom Input Toggle */}
+                {customAvatarToggle && (
+                  <div className="pt-2 animate-in fade-in duration-200">
+                    <input
+                      type="url"
+                      value={avatar}
+                      onChange={(e) => setAvatar(e.target.value)}
+                      className="w-full px-5 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-teal-500 transition-colors text-slate-800 dark:text-white text-xs"
+                      placeholder="Paste image URL here (https://...)"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Basic Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs uppercase font-extrabold tracking-wider text-slate-400 mb-2">
@@ -184,6 +294,7 @@ export default function ProfilePage() {
                     placeholder="Enter your name"
                   />
                 </div>
+                
                 <div>
                   <label className="block text-xs uppercase font-extrabold tracking-wider text-slate-400 mb-2">
                     Phone Number
@@ -196,11 +307,55 @@ export default function ProfilePage() {
                     placeholder="Enter phone number"
                   />
                 </div>
+
+                <div>
+                  <label className="block text-xs uppercase font-extrabold tracking-wider text-slate-400 mb-2">
+                    Gender
+                  </label>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    className="w-full px-5 py-3.5 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-teal-500 transition-colors text-slate-800 dark:text-white"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase font-extrabold tracking-wider text-slate-400 mb-2">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
+                    className="w-full px-5 py-3.5 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-teal-500 transition-colors text-slate-800 dark:text-white"
+                  />
+                </div>
               </div>
 
+              {/* Bio Field */}
               <div>
                 <label className="block text-xs uppercase font-extrabold tracking-wider text-slate-400 mb-2">
-                  Shipping Address
+                  Bio / About Me
+                </label>
+                <textarea
+                  rows="3"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  className="w-full px-5 py-3.5 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:border-teal-500 transition-colors text-slate-800 dark:text-white resize-none"
+                  placeholder="Tell us a bit about yourself..."
+                />
+              </div>
+
+              {/* Address Field */}
+              <div>
+                <label className="block text-xs uppercase font-extrabold tracking-wider text-slate-400 mb-2">
+                  Shipping / Delivery Address
                 </label>
                 <textarea
                   rows="3"
@@ -211,6 +366,7 @@ export default function ProfilePage() {
                 />
               </div>
 
+              {/* Action Buttons */}
               <div className="flex gap-4 pt-2">
                 <button
                   type="submit"
@@ -235,9 +391,27 @@ export default function ProfilePage() {
               </div>
             </form>
           ) : (
-            /* View Details Mode */
+            /* ==================== VIEW DETAILS MODE ==================== */
             <div className="space-y-6">
+              
+              {/* Bio block */}
+              {profile.bio && (
+                <div className="flex items-start gap-3 p-5 bg-slate-50/60 dark:bg-slate-900/40 border border-slate-200/30 dark:border-slate-800/30 rounded-3xl">
+                  <FileText className="w-5 h-5 text-teal-600 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <h4 className="text-xs uppercase font-extrabold tracking-wider text-slate-400">
+                      Bio / About Me
+                    </h4>
+                    <p className="text-sm text-slate-600 dark:text-slate-300 italic leading-relaxed">
+                      "{profile.bio}"
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Main Fields Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
                 {/* Phone */}
                 <div className="flex items-start gap-3">
                   <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl text-teal-600">
@@ -253,7 +427,43 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* Role Badge */}
+                {/* Gender */}
+                <div className="flex items-start gap-3">
+                  <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl text-teal-600">
+                    <User className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs uppercase font-extrabold tracking-wider text-slate-400">
+                      Gender
+                    </h4>
+                    <p className="text-slate-800 dark:text-slate-200 font-semibold mt-1">
+                      {profile.gender || 'Not specified'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Date of Birth */}
+                <div className="flex items-start gap-3">
+                  <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl text-teal-600">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs uppercase font-extrabold tracking-wider text-slate-400">
+                      Date of Birth
+                    </h4>
+                    <p className="text-slate-800 dark:text-slate-200 font-semibold mt-1">
+                      {profile.dob 
+                        ? new Date(profile.dob).toLocaleDateString(undefined, {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })
+                        : 'Not specified'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Account Type */}
                 <div className="flex items-start gap-3">
                   <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl text-teal-600">
                     <Shield className="w-5 h-5" />
@@ -269,9 +479,9 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Member Since */}
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 col-span-1 md:col-span-2">
                   <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-2xl text-teal-600">
-                    <Calendar className="w-5 h-5" />
+                    <UserCheck className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="text-xs uppercase font-extrabold tracking-wider text-slate-400">
