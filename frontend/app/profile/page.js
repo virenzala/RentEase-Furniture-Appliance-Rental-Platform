@@ -403,7 +403,7 @@ export default function ProfilePage() {
                       Bio / About Me
                     </h4>
                     <p className="text-sm text-slate-600 dark:text-slate-300 italic leading-relaxed">
-                      "{profile.bio}"
+                      &ldquo;{profile.bio}&rdquo;
                     </p>
                   </div>
                 </div>

@@ -179,9 +179,41 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
+// @desc    Reset password (demo mode)
+// @route   POST /api/auth/forgot-password
+// @access  Public
+const forgotPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
+      return res.status(400).json({ message: 'Please provide email and new password' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ message: 'No account found with this email address' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password
+    await User.findByIdAndUpdate(user._id, {
+      password: hashedPassword
+    });
+
+    res.json({ message: 'Password reset successfully!' });
+  } catch (error) {
+    console.error('Password reset failed:', error);
+    res.status(500).json({ message: 'Server error resetting password' });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
-  updateUserProfile
+  updateUserProfile,
+  forgotPassword
 };

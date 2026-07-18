@@ -62,6 +62,10 @@ export const authService = {
       localStorage.setItem('rentease_user', JSON.stringify(res.data));
     }
     return res.data;
+  },
+  forgotPassword: async (email, newPassword) => {
+    const res = await api.post('/auth/forgot-password', { email, newPassword });
+    return res.data;
   }
 };
 
