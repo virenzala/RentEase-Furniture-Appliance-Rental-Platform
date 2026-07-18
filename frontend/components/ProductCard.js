@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { MapPin, ArrowRight } from 'lucide-react';
 
 export default function ProductCard({ product }) {
@@ -12,11 +13,12 @@ export default function ProductCard({ product }) {
     <div className="group rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 overflow-hidden hover-lift flex flex-col justify-between">
       {/* Product Image Area */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
-        <img 
+        <Image 
           src={displayImage} 
           alt={title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {/* Category & City Badges */}
         <div className="absolute top-4 left-4 flex flex-col gap-1.5 z-10">
