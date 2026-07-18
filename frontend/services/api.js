@@ -55,6 +55,13 @@ export const authService = {
   getProfile: async () => {
     const res = await api.get('/auth/profile');
     return res.data;
+  },
+  updateProfile: async (userData) => {
+    const res = await api.put('/auth/profile', userData);
+    if (res.data) {
+      localStorage.setItem('rentease_user', JSON.stringify(res.data));
+    }
+    return res.data;
   }
 };
 

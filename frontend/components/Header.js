@@ -139,6 +139,15 @@ export default function Header() {
                   )}
 
                   <Link 
+                    href="/profile" 
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-all"
+                  >
+                    <UserIcon className="w-4 h-4 text-teal-600" />
+                    My Profile
+                  </Link>
+
+                  <Link 
                     href="/rentals" 
                     onClick={() => setDropdownOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-all"
@@ -224,6 +233,15 @@ export default function Header() {
                   Admin Dashboard
                 </Link>
               )}
+
+              <Link 
+                href="/profile" 
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl font-medium text-slate-700 dark:text-slate-200"
+              >
+                <UserIcon className="w-4 h-4 text-teal-600" />
+                My Profile
+              </Link>
 
               <button 
                 onClick={handleLogout}

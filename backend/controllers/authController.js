@@ -116,8 +116,44 @@ const getUserProfile = async (req, res) => {
   }
 };
 
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (user) {
+      const name = req.body.name || user.name;
+      const phone = req.body.phone !== undefined ? req.body.phone : user.phone;
+      const address = req.body.address !== undefined ? req.body.address : user.address;
+      
+      const updatedUser = await User.findByIdAndUpdate(req.user._id, {
+        name,
+        phone,
+        address
+      });
+
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        phone: updatedUser.phone,
+        address: updatedUser.address,
+        createdAt: updatedUser.createdAt
+      });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Update profile failed:', error);
+    res.status(500).json({ message: 'Server error updating profile' });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
-  getUserProfile
+  getUserProfile,
+  updateUserProfile
 };
