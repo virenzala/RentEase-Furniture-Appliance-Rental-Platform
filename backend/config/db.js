@@ -235,5 +235,13 @@ module.exports = {
   MaintenanceRequest: new Model('maintenanceRequests'),
   dbFile: DB_FILE,
   readDb: () => ({ users: [], products: [], rentals: [], maintenanceRequests: [] }),
-  writeDb: () => {}
+  writeDb: () => {},
+  checkDbHealth: async () => {
+    try {
+      const res = await pool.query('SELECT NOW()');
+      return { connected: true, timestamp: res.rows[0].now };
+    } catch (err) {
+      return { connected: false, error: err.message };
+    }
+  }
 };

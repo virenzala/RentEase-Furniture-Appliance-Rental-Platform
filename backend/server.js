@@ -21,6 +21,7 @@ const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const rentalRoutes = require('./routes/rentalRoutes');
 const maintenanceRoutes = require('./routes/maintenanceRoutes');
+const { checkDbHealth } = require('./config/db');
 
 // Mount API Routes
 app.use('/api/auth', authRoutes);
@@ -29,12 +30,18 @@ app.use('/api/rentals', rentalRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  const dbHealth = await checkDbHealth();
   res.json({
-    status: 'healthy',
+    status: dbHealth.connected ? 'healthy' : 'degraded',
     message: 'RentEase Full-Stack Backend running successfully',
     timestamp: new Date().toISOString(),
-    database: 'local-json-datastore'
+    database: {
+      provider: 'Supabase PostgreSQL',
+      connected: dbHealth.connected,
+      dbTimestamp: dbHealth.timestamp,
+      error: dbHealth.error || null
+    }
   });
 });
 
@@ -62,7 +69,7 @@ if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`====================================================`);
     console.log(`🚀 RentEase Server running on port ${PORT}`);
-    console.log(`📂 Database stored locally in backend/data/db.json`);
+    console.log(`📂 Database: Supabase PostgreSQL Cloud Database`);
     console.log(`⚡ API Health URL: http://localhost:${PORT}/api/health`);
     console.log(`====================================================`);
   });
