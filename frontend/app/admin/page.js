@@ -65,6 +65,38 @@ export default function AdminDashboard() {
   const [newStock, setNewStock] = useState('5');
   const [newCity, setNewCity] = useState('New York');
   const [newImage, setNewImage] = useState('');
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    setUploading(true);
+    try {
+      const token = localStorage.getItem('rentease_token');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/upload-image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      const data = await response.json();
+      if (response.ok && data.url) {
+        setNewImage(data.url);
+      } else {
+        alert(data.message || 'Failed to upload image');
+      }
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      alert('Error uploading image');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   async function loadAdminData() {
     setLoading(true);
@@ -412,14 +444,48 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Product Image URL</label>
-                  <input 
-                    type="text" 
-                    placeholder="https://unsplash.com/photo-abc..."
-                    value={newImage}
-                    onChange={(e) => setNewImage(e.target.value)}
-                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs font-semibold w-full focus:outline-none focus:border-teal-500"
-                  />
+                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Product Image</label>
+                  <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+                    <div className="relative flex-grow">
+                      <input 
+                        type="text" 
+                        placeholder="Paste image URL (or upload below)..."
+                        value={newImage}
+                        onChange={(e) => setNewImage(e.target.value)}
+                        className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-10 py-3 text-xs font-semibold w-full focus:outline-none focus:border-teal-500"
+                      />
+                      {newImage && (
+                        <div className="absolute right-3.5 top-3 w-4 h-4 text-emerald-500 shrink-0">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <label className="flex items-center justify-center gap-1.5 px-4 py-3 bg-teal-50 dark:bg-teal-950/30 hover:bg-teal-100 dark:hover:bg-teal-950/50 border border-teal-200/50 dark:border-teal-800/30 rounded-xl text-teal-600 dark:text-teal-400 text-xs font-bold cursor-pointer transition-all shrink-0">
+                      {uploading ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z" />
+                          </svg>
+                          <span>Upload Image</span>
+                        </>
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        disabled={uploading}
+                      />
+                    </label>
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-1.5">

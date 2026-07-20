@@ -150,10 +150,77 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+const supabase = require('../config/supabase');
+
+// @desc    Upload a product image to Supabase Storage
+// @route   POST /api/products/upload-image
+// @access  Private (Admin or Vendor)
+const uploadProductImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file provided for upload' });
+    }
+
+    if (!supabase) {
+      return res.status(500).json({ message: 'Supabase storage is not configured' });
+    }
+
+    const bucketName = 'product-images';
+
+    // 1. Ensure bucket exists and is public
+    try {
+      const { data: buckets, error: getError } = await supabase.storage.listBuckets();
+      if (!getError) {
+        const exists = buckets.some(b => b.name === bucketName);
+        if (!exists) {
+          console.log(`🔄 Creating public bucket '${bucketName}' in Supabase...`);
+          const { error: createError } = await supabase.storage.createBucket(bucketName, {
+            public: true,
+            allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'],
+            fileSizeLimit: 5242880 // 5MB
+          });
+          if (createError) throw createError;
+        }
+      }
+    } catch (e) {
+      console.warn('Bucket auto-creation check bypassed:', e.message);
+    }
+
+    // 2. Generate unique file name
+    const fileExt = req.file.originalname.split('.').pop() || 'png';
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+
+    // 3. Upload file buffer
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .upload(fileName, req.file.buffer, {
+        contentType: req.file.mimetype,
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) {
+      console.error('Supabase upload error:', error);
+      return res.status(500).json({ message: `Upload failed: ${error.message}` });
+    }
+
+    // 4. Resolve public URL
+    const { data: urlData } = supabase.storage
+      .from(bucketName)
+      .getPublicUrl(fileName);
+
+    res.json({ url: urlData.publicUrl });
+  } catch (error) {
+    console.error('Image upload failed:', error);
+    res.status(500).json({ message: 'Server error uploading product image' });
+  }
+};
+
 module.exports = {
   getProducts,
   getProductById,
   createProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  uploadProductImage
 };
