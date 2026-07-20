@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { User } = require('../config/db');
 const { JWT_SECRET } = require('../middleware/auth');
+const emailService = require('../services/emailService');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -42,6 +43,9 @@ const registerUser = async (req, res) => {
       gender: '',
       dob: ''
     });
+
+    // Send Welcome Email asynchronously
+    emailService.sendWelcomeEmail(newUser.email, newUser.name);
 
     res.status(201).json({
       _id: newUser._id,

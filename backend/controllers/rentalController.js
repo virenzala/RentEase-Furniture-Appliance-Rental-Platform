@@ -1,4 +1,5 @@
 const { Rental, Product } = require('../config/db');
+const emailService = require('../services/emailService');
 
 // @desc    Create a new rental transaction
 // @route   POST /api/rentals
@@ -66,6 +67,9 @@ const createRental = async (req, res) => {
       rental.product = product;
       createdRentals.push(rental);
     }
+
+    // Send Rental Confirmation Email asynchronously
+    emailService.sendRentalConfirmationEmail(req.user.email, req.user.name, createdRentals, deliveryAddress);
 
     res.status(201).json(createdRentals);
   } catch (error) {

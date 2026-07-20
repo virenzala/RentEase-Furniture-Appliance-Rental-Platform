@@ -1,4 +1,5 @@
-const { MaintenanceRequest, Rental, Product } = require('../config/db');
+const { MaintenanceRequest, Rental, Product, User } = require('../config/db');
+const emailService = require('../services/emailService');
 
 // @desc    Create a new maintenance ticket
 // @route   POST /api/maintenance
@@ -29,6 +30,17 @@ const createRequest = async (req, res) => {
       priority: priority || 'medium', // 'low' | 'medium' | 'high'
       status: 'pending' // 'pending' | 'assigned' | 'resolved'
     });
+
+    // Send Ticket Filed Email asynchronously
+    (async () => {
+      try {
+        const product = await Product.findById(rental.productId);
+        const productTitle = product ? product.title : 'Rented Item';
+        emailService.sendMaintenanceTicketCreatedEmail(req.user.email, req.user.name, ticket, productTitle);
+      } catch (err) {
+        console.error('Failed to send maintenance ticket creation email:', err);
+      }
+    })();
 
     res.status(201).json(ticket);
   } catch (error) {
@@ -108,6 +120,22 @@ const updateRequestStatus = async (req, res) => {
     }
 
     const updated = await MaintenanceRequest.findByIdAndUpdate(req.params.id, { status });
+
+    // Send Status Update Email asynchronously
+    (async () => {
+      try {
+        const user = await User.findById(ticket.userId);
+        if (user) {
+          const rental = await Rental.findById(ticket.rentalId);
+          const product = rental ? await Product.findById(rental.productId) : null;
+          const productTitle = product ? product.title : 'Rented Item';
+          emailService.sendMaintenanceTicketStatusUpdateEmail(user.email, user.name, updated, productTitle, status);
+        }
+      } catch (err) {
+        console.error('Failed to send status update email:', err);
+      }
+    })();
+
     res.json(updated);
   } catch (error) {
     console.error('Update ticket status failed:', error);
