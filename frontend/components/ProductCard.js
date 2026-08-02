@@ -1,26 +1,40 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { MapPin, ArrowRight } from 'lucide-react';
-
-import { getProductImage } from '../utils/imageUtils';
+import { getProductImage, FALLBACK_IMAGES } from '../utils/imageUtils';
 
 export default function ProductCard({ product }) {
   const { _id, title, category, monthlyRent, securityDeposit, city, tenureOptions } = product;
-  const displayImage = getProductImage(product);
+  
+  const initialImage = getProductImage(product);
+  const [imgSrc, setImgSrc] = useState(initialImage);
+
+  useEffect(() => {
+    setImgSrc(getProductImage(product));
+  }, [product]);
+
+  const handleImageError = () => {
+    const cat = (category || '').toLowerCase();
+    if (cat.includes('appliance')) {
+      setImgSrc(FALLBACK_IMAGES.appliances);
+    } else if (cat.includes('electronic')) {
+      setImgSrc(FALLBACK_IMAGES.electronics);
+    } else {
+      setImgSrc(FALLBACK_IMAGES.furniture);
+    }
+  };
 
   return (
     <div className="group rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 overflow-hidden hover-lift flex flex-col justify-between">
       {/* Product Image Area */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-700">
-        <Image 
-          src={displayImage} 
+        <img 
+          src={imgSrc} 
           alt={title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          onError={handleImageError}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         {/* Category & City Badges */}
         <div className="absolute top-4 left-4 flex flex-col gap-1.5 z-10">
