@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  rentease-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rentease-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - JWT_SECRET=rentease_super_secret_jwt_key_2026
+    restart: always
+
+  rentease-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: rentease-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+    depends_on:
+      - rentease-backend
+    restart: always
