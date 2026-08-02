@@ -85,13 +85,29 @@ const createProduct = async (req, res) => {
       return res.status(400).json({ message: 'Please enter all required fields: title, category, monthlyRent, securityDeposit, city' });
     }
 
+    const DEFAULT_CATEGORY_IMAGES = {
+      furniture: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80',
+      appliances: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=800&q=80',
+      electronics: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=800&q=80'
+    };
+    const catLower = (category || '').toLowerCase();
+    const fallbackImg = catLower.includes('appliance') 
+      ? DEFAULT_CATEGORY_IMAGES.appliances 
+      : catLower.includes('electronic') 
+        ? DEFAULT_CATEGORY_IMAGES.electronics 
+        : DEFAULT_CATEGORY_IMAGES.furniture;
+
+    const finalImages = (Array.isArray(images) && images.length > 0 && images[0] && images[0].trim() !== '') 
+      ? images 
+      : [fallbackImg];
+
     const newProduct = await Product.create({
       title,
       category,
       description: description || '',
       monthlyRent: Number(monthlyRent),
       securityDeposit: Number(securityDeposit),
-      images: images || [],
+      images: finalImages,
       tenureOptions: tenureOptions || [3, 6, 12, 24],
       stock: stock !== undefined ? Number(stock) : 5,
       city: city,

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { productService } from '../../../services/api';
 import { useCart } from '../../../hooks/useCart';
+import { getProductImage, handleImageError } from '../../../utils/imageUtils';
 import { 
   ArrowLeft, 
   MapPin, 
@@ -34,9 +35,7 @@ export default function ProductDetails({ params }) {
         const data = await productService.getById(id);
         setProduct(data);
         setSelectedTenure(data.tenureOptions ? data.tenureOptions[0] : 6);
-        if (data.images && data.images.length > 0) {
-          setActiveImage(data.images[0]);
-        }
+        setActiveImage(getProductImage(data));
       } catch (err) {
         console.error('Error fetching product by ID:', err);
       } finally {
@@ -116,8 +115,9 @@ export default function ProductDetails({ params }) {
         <div className="flex flex-col gap-4">
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[2.5rem] bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 shadow-md">
             <img 
-              src={activeImage || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80'} 
+              src={activeImage || getProductImage(product)} 
               alt={product.title}
+              onError={(e) => handleImageError(e, product.category)}
               className="w-full h-full object-cover"
             />
             {/* Stock Badge Overlay */}
@@ -143,7 +143,12 @@ export default function ProductDetails({ params }) {
                       : 'border-transparent opacity-70 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt={`${product.title}-${idx}`} className="w-full h-full object-cover" />
+                  <img 
+                    src={img} 
+                    alt={`${product.title}-${idx}`} 
+                    onError={(e) => handleImageError(e, product.category)}
+                    className="w-full h-full object-cover" 
+                  />
                 </button>
               ))}
             </div>

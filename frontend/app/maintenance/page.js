@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { maintenanceService, rentalService, authService } from '../../services/api';
+import { getProductImage, handleImageError } from '../../utils/imageUtils';
 import { 
   Wrench, 
   AlertCircle, 
@@ -256,7 +257,12 @@ function MaintenanceContent() {
                   <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                     <div className="flex items-center gap-3">
                       <div className="w-14 h-10 rounded-xl overflow-hidden bg-slate-100 shrink-0">
-                        <img src={ticket.productImage} alt="" className="w-full h-full object-cover" />
+                        <img 
+                          src={ticket.productImage || getProductImage({ title: ticket.productTitle })} 
+                          alt={ticket.productTitle || ''} 
+                          onError={(e) => handleImageError(e, 'furniture')}
+                          className="w-full h-full object-cover" 
+                        />
                       </div>
                       <div>
                         <h4 className="font-outfit font-bold text-slate-800 dark:text-white leading-tight">

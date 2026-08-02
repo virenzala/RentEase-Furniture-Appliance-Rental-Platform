@@ -5,9 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, ArrowRight } from 'lucide-react';
 
+import { getProductImage } from '../utils/imageUtils';
+
 export default function ProductCard({ product }) {
-  const { _id, title, category, monthlyRent, securityDeposit, images, city, tenureOptions } = product;
-  const displayImage = images && images.length > 0 ? images[0] : 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80';
+  const { _id, title, category, monthlyRent, securityDeposit, city, tenureOptions } = product;
+  const displayImage = getProductImage(product);
 
   return (
     <div className="group rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 overflow-hidden hover-lift flex flex-col justify-between">

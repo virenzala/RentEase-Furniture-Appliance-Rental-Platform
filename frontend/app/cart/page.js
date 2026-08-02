@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '../../hooks/useCart';
 import { authService } from '../../services/api';
+import { getProductImage, handleImageError } from '../../utils/imageUtils';
 import { 
   ShoppingBag, 
   Trash2, 
@@ -107,8 +108,9 @@ export default function Cart() {
                 {/* Product Image */}
                 <div className="w-full sm:w-32 aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-700 shrink-0">
                   <img 
-                    src={product.images && product.images.length > 0 ? product.images[0] : ''} 
+                    src={getProductImage(product)} 
                     alt={product.title} 
+                    onError={(e) => handleImageError(e, product.category)}
                     className="w-full h-full object-cover"
                   />
                 </div>

@@ -8,6 +8,7 @@ import {
   maintenanceService, 
   authService 
 } from '../../services/api';
+import { getProductImage, handleImageError } from '../../utils/imageUtils';
 import { 
   BarChart, 
   Bar, 
@@ -523,7 +524,12 @@ export default function AdminDashboard() {
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-9 aspect-[4/3] rounded-lg overflow-hidden bg-slate-200 shrink-0">
-                          <img src={prod.images && prod.images[0]} alt="" className="w-full h-full object-cover" />
+                          <img 
+                            src={getProductImage(prod)} 
+                            alt={prod.title} 
+                            onError={(e) => handleImageError(e, prod.category)}
+                            className="w-full h-full object-cover" 
+                          />
                         </div>
                         <div>
                           <h4 className="font-outfit font-bold text-xs text-slate-800 dark:text-slate-200 line-clamp-1">
@@ -620,7 +626,12 @@ export default function AdminDashboard() {
                     >
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-12 rounded-xl overflow-hidden bg-slate-200 shrink-0">
-                          <img src={t.productImage} alt="" className="w-full h-full object-cover" />
+                          <img 
+                            src={t.productImage || getProductImage({ title: t.productTitle })} 
+                            alt={t.productTitle || ''} 
+                            onError={(e) => handleImageError(e, 'furniture')}
+                            className="w-full h-full object-cover" 
+                          />
                         </div>
                         <div>
                           <span className={`px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase ${

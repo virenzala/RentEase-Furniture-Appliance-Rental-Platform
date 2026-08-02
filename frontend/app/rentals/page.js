@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { rentalService, authService } from '../../services/api';
+import { getProductImage, handleImageError } from '../../utils/imageUtils';
 import { 
   Calendar, 
   Clock, 
@@ -187,7 +188,12 @@ export default function MyRentals() {
                         {/* Left Side Info */}
                         <div className="flex items-center gap-4">
                           <div className="w-20 h-15 aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-700 shrink-0">
-                            <img src={rental.product.images && rental.product.images[0]} alt={rental.product.title} className="w-full h-full object-cover" />
+                            <img 
+                              src={getProductImage(rental.product)} 
+                              alt={rental.product.title} 
+                              onError={(e) => handleImageError(e, rental.product.category)}
+                              className="w-full h-full object-cover" 
+                            />
                           </div>
                           <div>
                             <span className="px-2.5 py-0.5 rounded-md text-[9px] font-extrabold bg-teal-50 dark:bg-teal-950/40 text-teal-600 uppercase tracking-wider">
@@ -315,7 +321,12 @@ export default function MyRentals() {
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-12 rounded-xl overflow-hidden bg-slate-200 shrink-0">
-                        <img src={rental.product.images && rental.product.images[0]} alt={rental.product.title} className="w-full h-full object-cover grayscale" />
+                        <img 
+                          src={getProductImage(rental.product)} 
+                          alt={rental.product.title} 
+                          onError={(e) => handleImageError(e, rental.product.category)}
+                          className="w-full h-full object-cover grayscale" 
+                        />
                       </div>
                       <div>
                         <h4 className="font-outfit font-bold text-slate-800 dark:text-slate-200 leading-tight">
