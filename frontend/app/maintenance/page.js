@@ -334,8 +334,9 @@ function MaintenanceContent() {
             </div>
           )}
         </div>
-      )}
-    </div>
+      </div>
+    )}
+  </div>
   );
 }
 
