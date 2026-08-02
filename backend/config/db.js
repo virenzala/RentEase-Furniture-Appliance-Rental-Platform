@@ -5,7 +5,8 @@ const { Pool } = require('pg');
 // Load environment variables relative to this config directory
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
-const DATA_DIR = path.join(__dirname, '../data');
+const BUNDLED_DB_FILE = path.join(__dirname, '../data/db.json');
+const DATA_DIR = process.env.VERCEL ? '/tmp' : path.join(__dirname, '../data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 
 const connectionString = process.env.DATABASE_URL;
@@ -33,29 +34,42 @@ const tableMap = {
   maintenanceRequests: 'maintenance_requests'
 };
 
+// In-memory cache fallback for serverless/read-only environments
+let memoryDb = null;
+
 // Local JSON DB Helper
 function readLocalDb() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
-  if (!fs.existsSync(DB_FILE)) {
-    const initialData = { users: [], products: [], rentals: [], maintenanceRequests: [] };
-    fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2));
-    return initialData;
-  }
+  if (memoryDb) return memoryDb;
+  
   try {
-    const content = fs.readFileSync(DB_FILE, 'utf-8');
-    return JSON.parse(content);
+    if (fs.existsSync(DB_FILE)) {
+      const content = fs.readFileSync(DB_FILE, 'utf-8');
+      memoryDb = JSON.parse(content);
+      return memoryDb;
+    }
+    if (fs.existsSync(BUNDLED_DB_FILE)) {
+      const content = fs.readFileSync(BUNDLED_DB_FILE, 'utf-8');
+      memoryDb = JSON.parse(content);
+      return memoryDb;
+    }
   } catch (e) {
-    return { users: [], products: [], rentals: [], maintenanceRequests: [] };
+    console.warn('Error reading local DB:', e.message);
   }
+  
+  memoryDb = { users: [], products: [], rentals: [], maintenanceRequests: [] };
+  return memoryDb;
 }
 
 function writeLocalDb(data) {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  memoryDb = data;
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.warn('Notice: Local DB file write skipped (read-only filesystem):', e.message);
   }
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 }
 
 // Initialize DB (Supabase or Local)

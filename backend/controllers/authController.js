@@ -45,7 +45,9 @@ const registerUser = async (req, res) => {
     });
 
     // Send Welcome Email asynchronously
-    emailService.sendWelcomeEmail(newUser.email, newUser.name);
+    emailService.sendWelcomeEmail(newUser.email, newUser.name).catch(err => {
+      console.warn('Welcome email async send notice:', err.message);
+    });
 
     res.status(201).json({
       _id: newUser._id,
