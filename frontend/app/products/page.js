@@ -33,15 +33,25 @@ function ProductsListingContent() {
   const [maxRent, setMaxRent] = useState(200);
   const [sort, setSort] = useState('newest');
 
+  // Sync URL search parameters with state
+  useEffect(() => {
+    const qCat = searchParams.get('category') || 'all';
+    const qCity = searchParams.get('city') || 'all';
+    const qSearch = searchParams.get('search') || '';
+    setCategory(qCat);
+    setCity(qCity);
+    setSearch(qSearch);
+  }, [searchParams]);
+
   // Trigger loading products on query changes
   useEffect(() => {
     async function loadFilteredProducts() {
       setLoading(true);
       try {
         const filters = {
-          category,
-          city,
-          search,
+          category: category !== 'all' ? category : undefined,
+          city: city !== 'all' ? city : undefined,
+          search: search.trim() ? search.trim() : undefined,
           minRent: minRent > 0 ? minRent : undefined,
           maxRent: maxRent < 200 ? maxRent : undefined,
           sort
