@@ -30,7 +30,7 @@ function ProductsListingContent() {
   const [category, setCategory] = useState(initialCategory);
   const [city, setCity] = useState(initialCity);
   const [minRent, setMinRent] = useState(0);
-  const [maxRent, setMaxRent] = useState(100);
+  const [maxRent, setMaxRent] = useState(200);
   const [sort, setSort] = useState('newest');
 
   // Trigger loading products on query changes
@@ -43,7 +43,7 @@ function ProductsListingContent() {
           city,
           search,
           minRent: minRent > 0 ? minRent : undefined,
-          maxRent: maxRent < 100 ? maxRent : undefined,
+          maxRent: maxRent < 200 ? maxRent : undefined,
           sort
         };
         const data = await productService.getAll(filters);
@@ -68,7 +68,7 @@ function ProductsListingContent() {
     setCategory('all');
     setCity('all');
     setMinRent(0);
-    setMaxRent(100);
+    setMaxRent(200);
     setSort('newest');
     router.push('/products');
   };
@@ -166,7 +166,7 @@ function ProductsListingContent() {
               <input 
                 type="range"
                 min="0"
-                max="100"
+                max="200"
                 value={maxRent}
                 onChange={(e) => setMaxRent(Number(e.target.value))}
                 className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-teal-600"
