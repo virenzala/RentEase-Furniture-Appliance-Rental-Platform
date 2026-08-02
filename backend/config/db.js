@@ -112,16 +112,17 @@ async function initDb() {
 
         console.log('⚡ Supabase PostgreSQL tables initialized successfully');
 
-        // Check if products table is empty and auto-populate 104 products
+        // Check if products table has less than 100 products and auto-populate 104 products
         const countRes = await pool.query('SELECT COUNT(*) FROM products');
-        if (parseInt(countRes.rows[0].count, 10) === 0) {
-          console.log('🌱 Supabase PostgreSQL products table is empty. Auto-populating catalog...');
+        const currentCount = parseInt(countRes.rows[0].count, 10);
+        if (currentCount < 100) {
+          console.log(`🌱 Supabase PostgreSQL has ${currentCount} products (< 100). Auto-populating full 104 catalog...`);
           const initialData = readLocalDb();
           
           if (initialData.users && initialData.users.length > 0) {
             for (const u of initialData.users) {
               await pool.query(
-                `INSERT INTO users (_id, data) VALUES ($1, $2) ON CONFLICT (_id) DO NOTHING`,
+                `INSERT INTO users (_id, data) VALUES ($1, $2) ON CONFLICT (_id) DO UPDATE SET data = $2`,
                 [u._id, JSON.stringify(u)]
               );
             }
@@ -130,12 +131,12 @@ async function initDb() {
           if (initialData.products && initialData.products.length > 0) {
             for (const p of initialData.products) {
               await pool.query(
-                `INSERT INTO products (_id, data) VALUES ($1, $2) ON CONFLICT (_id) DO NOTHING`,
+                `INSERT INTO products (_id, data) VALUES ($1, $2) ON CONFLICT (_id) DO UPDATE SET data = $2`,
                 [p._id, JSON.stringify(p)]
               );
             }
           }
-          console.log('🎉 Supabase PostgreSQL auto-seeded default catalog successfully!');
+          console.log('🎉 Supabase PostgreSQL auto-seeded 104 products successfully!');
         }
       } catch (err) {
         console.warn('⚠️ Supabase PG connection failed, falling back to local JSON database:', err.message);
