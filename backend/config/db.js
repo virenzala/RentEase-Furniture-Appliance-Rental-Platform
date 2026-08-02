@@ -111,6 +111,32 @@ async function initDb() {
         `);
 
         console.log('⚡ Supabase PostgreSQL tables initialized successfully');
+
+        // Check if products table is empty and auto-populate 104 products
+        const countRes = await pool.query('SELECT COUNT(*) FROM products');
+        if (parseInt(countRes.rows[0].count, 10) === 0) {
+          console.log('🌱 Supabase PostgreSQL products table is empty. Auto-populating catalog...');
+          const initialData = readLocalDb();
+          
+          if (initialData.users && initialData.users.length > 0) {
+            for (const u of initialData.users) {
+              await pool.query(
+                `INSERT INTO users (_id, data) VALUES ($1, $2) ON CONFLICT (_id) DO NOTHING`,
+                [u._id, JSON.stringify(u)]
+              );
+            }
+          }
+          
+          if (initialData.products && initialData.products.length > 0) {
+            for (const p of initialData.products) {
+              await pool.query(
+                `INSERT INTO products (_id, data) VALUES ($1, $2) ON CONFLICT (_id) DO NOTHING`,
+                [p._id, JSON.stringify(p)]
+              );
+            }
+          }
+          console.log('🎉 Supabase PostgreSQL auto-seeded default catalog successfully!');
+        }
       } catch (err) {
         console.warn('⚠️ Supabase PG connection failed, falling back to local JSON database:', err.message);
         readLocalDb();
