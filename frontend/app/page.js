@@ -28,10 +28,11 @@ export default function Home() {
     async function loadFeatured() {
       try {
         const data = await productService.getAll();
-        // Limit to first 3 items for home page showcase
-        setFeatured(data.slice(0, 3));
+        // Showcase top 6 featured products on home page
+        setFeatured(Array.isArray(data) ? data.slice(0, 6) : []);
       } catch (err) {
         console.error('Error loading featured items:', err);
+        setFeatured([]);
       } finally {
         setLoading(false);
       }

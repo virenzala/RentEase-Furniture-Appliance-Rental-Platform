@@ -74,12 +74,12 @@ export const productService = {
   getAll: async (filters = {}) => {
     const params = new URLSearchParams();
     Object.keys(filters).forEach(key => {
-      if (filters[key]) {
+      if (filters[key] !== undefined && filters[key] !== null) {
         params.append(key, filters[key]);
       }
     });
     const res = await api.get(`/products?${params.toString()}`);
-    return res.data;
+    return Array.isArray(res.data) ? res.data : [];
   },
   getById: async (id) => {
     const res = await api.get(`/products/${id}`);

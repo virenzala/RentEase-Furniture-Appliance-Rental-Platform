@@ -9,41 +9,45 @@ const getProducts = async (req, res) => {
 
     let products = await Product.find();
 
+    if (!Array.isArray(products)) {
+      products = [];
+    }
+
     // 1. Filter by category
     if (category && category !== 'all') {
-      products = products.filter(p => p.category.toLowerCase() === category.toLowerCase());
+      products = products.filter(p => p && p.category && p.category.toLowerCase() === category.toLowerCase());
     }
 
     // 2. Filter by city
     if (city && city !== 'all') {
-      products = products.filter(p => p.city.toLowerCase() === city.toLowerCase());
+      products = products.filter(p => p && p.city && p.city.toLowerCase() === city.toLowerCase());
     }
 
     // 3. Keyword Search (title & description)
     if (search) {
       const term = search.toLowerCase();
       products = products.filter(p => 
-        p.title.toLowerCase().includes(term) || 
-        (p.description && p.description.toLowerCase().includes(term))
+        p && ((p.title && p.title.toLowerCase().includes(term)) || 
+        (p.description && p.description.toLowerCase().includes(term)))
       );
     }
 
     // 4. Rent Range Filter
     if (minRent) {
-      products = products.filter(p => p.monthlyRent >= Number(minRent));
+      products = products.filter(p => p && Number(p.monthlyRent || 0) >= Number(minRent));
     }
     if (maxRent) {
-      products = products.filter(p => p.monthlyRent <= Number(maxRent));
+      products = products.filter(p => p && Number(p.monthlyRent || 0) <= Number(maxRent));
     }
 
     // 5. Sorting
     if (sort) {
       if (sort === 'price-asc') {
-        products.sort((a, b) => a.monthlyRent - b.monthlyRent);
+        products.sort((a, b) => (a.monthlyRent || 0) - (b.monthlyRent || 0));
       } else if (sort === 'price-desc') {
-        products.sort((a, b) => b.monthlyRent - a.monthlyRent);
+        products.sort((a, b) => (b.monthlyRent || 0) - (a.monthlyRent || 0));
       } else if (sort === 'newest') {
-        products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        products.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
       }
     }
 

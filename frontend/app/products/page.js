@@ -47,9 +47,10 @@ function ProductsListingContent() {
           sort
         };
         const data = await productService.getAll(filters);
-        setProducts(data);
+        setProducts(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Error fetching filtered products:', err);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
