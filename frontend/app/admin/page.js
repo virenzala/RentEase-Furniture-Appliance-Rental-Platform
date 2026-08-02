@@ -77,7 +77,7 @@ export default function AdminDashboard() {
     setUploading(true);
     try {
       const token = localStorage.getItem('rentease_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/products/upload-image`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/products/upload-image`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
