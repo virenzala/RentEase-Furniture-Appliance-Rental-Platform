@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { rentalService } from '../../services/api';
+import { rentalService, authService } from '../../services/api';
 import { 
   Calendar, 
   Clock, 
@@ -22,6 +22,7 @@ export default function MyRentals() {
   const router = useRouter();
   const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
   // Interaction States
   const [extendingId, setExtendingId] = useState(null);
@@ -41,7 +42,13 @@ export default function MyRentals() {
   }
 
   useEffect(() => {
-    loadMyRentals();
+    const cachedUser = authService.getCurrentUser();
+    setUser(cachedUser);
+    if (cachedUser) {
+      loadMyRentals();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const handleExtendLease = async (rentalId) => {
@@ -122,7 +129,24 @@ export default function MyRentals() {
       </div>
 
       {/* Main rentals section */}
-      {rentals.length === 0 ? (
+      {!user ? (
+        <div className="flex flex-col items-center justify-center text-center p-12 bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 rounded-[2.5rem] shadow-sm max-w-lg mx-auto mt-10">
+          <div className="w-16 h-16 rounded-full bg-teal-50 dark:bg-teal-950/40 flex items-center justify-center text-teal-600 mb-4">
+            <Calendar className="w-8 h-8" />
+          </div>
+          <h3 className="font-outfit font-extrabold text-xl text-slate-800 dark:text-white mb-2">Sign In to View Your Rentals</h3>
+          <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6 font-light">
+            Sign in to your account to track active leases, extend rental durations, or schedule return pickups.
+          </p>
+          <Link
+            href="/login?redirect=/rentals"
+            className="px-6 py-3.5 bg-teal-600 hover:bg-teal-500 text-white rounded-2xl font-bold shadow-md hover-lift transition-all text-sm flex items-center gap-1.5"
+          >
+            Sign In to Account
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      ) : rentals.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center p-12 bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 rounded-[2.5rem] shadow-sm max-w-lg mx-auto mt-10">
           <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-300 mb-4">
             <Calendar className="w-8 h-8" />

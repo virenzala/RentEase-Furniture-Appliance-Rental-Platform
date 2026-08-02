@@ -69,10 +69,8 @@ export default function Header() {
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Products', path: '/products' },
-    ...(user ? [
-      { name: 'My Rentals', path: '/rentals', icon: Calendar },
-      { name: 'Maintenance', path: '/maintenance', icon: Wrench }
-    ] : [])
+    { name: 'My Rentals', path: '/rentals', icon: Calendar },
+    { name: 'Maintenance', path: '/maintenance', icon: Wrench }
   ];
 
   return (

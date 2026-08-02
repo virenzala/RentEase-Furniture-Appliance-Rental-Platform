@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { maintenanceService, rentalService } from '../../services/api';
+import { maintenanceService, rentalService, authService } from '../../services/api';
 import { 
   Wrench, 
   AlertCircle, 
@@ -13,7 +13,8 @@ import {
   HelpCircle,
   Inbox,
   PlusCircle,
-  ChevronRight
+  ChevronRight,
+  ArrowRight
 } from 'lucide-react';
 
 function MaintenanceContent() {
@@ -25,6 +26,7 @@ function MaintenanceContent() {
   const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formLoading, setFormLoading] = useState(false);
+  const [user, setUser] = useState(null);
 
   // Form Fields
   const [selectedRental, setSelectedRental] = useState(preSelectedRental);
@@ -53,7 +55,13 @@ function MaintenanceContent() {
   }
 
   useEffect(() => {
-    loadData();
+    const cachedUser = authService.getCurrentUser();
+    setUser(cachedUser);
+    if (cachedUser) {
+      loadData();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const handleSubmitTicket = async (e) => {
@@ -115,7 +123,25 @@ function MaintenanceContent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+      {!user ? (
+        <div className="flex flex-col items-center justify-center text-center p-12 bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 rounded-[2.5rem] shadow-sm max-w-lg mx-auto mt-10">
+          <div className="w-16 h-16 rounded-full bg-teal-50 dark:bg-teal-950/40 flex items-center justify-center text-teal-600 mb-4">
+            <Wrench className="w-8 h-8" />
+          </div>
+          <h3 className="font-outfit font-extrabold text-xl text-slate-800 dark:text-white mb-2">Sign In for Maintenance Support</h3>
+          <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6 font-light">
+            Sign in to submit repair tickets, schedule technician visits, or track ticket progress for your leased items.
+          </p>
+          <a
+            href="/login?redirect=/maintenance"
+            className="px-6 py-3.5 bg-teal-600 hover:bg-teal-500 text-white rounded-2xl font-bold shadow-md hover-lift transition-all text-sm flex items-center gap-1.5"
+          >
+            Sign In to Account
+            <ArrowRight className="w-4 h-4" />
+          </a>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         {/* LEFT COLUMN: Submit Repair Form */}
         <div className="lg:col-span-5 bg-white dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 p-8 rounded-[2.5rem] shadow-sm">
           <h3 className="font-outfit font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2 mb-6">
@@ -308,7 +334,7 @@ function MaintenanceContent() {
             </div>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
