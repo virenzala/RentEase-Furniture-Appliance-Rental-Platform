@@ -195,7 +195,8 @@ const forgotPassword = async (req, res) => {
       return res.status(400).json({ message: 'Please provide email and new password' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: cleanEmail });
     if (!user) {
       return res.status(404).json({ message: 'No account found with this email address' });
     }

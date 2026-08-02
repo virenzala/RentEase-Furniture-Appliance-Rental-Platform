@@ -172,7 +172,11 @@ class Model {
               if (item[key] === value) return false;
             }
           } else {
-            if (item[key] !== query[key]) return false;
+            if (typeof item[key] === 'string' && typeof query[key] === 'string') {
+              if (item[key].trim().toLowerCase() !== query[key].trim().toLowerCase()) return false;
+            } else if (item[key] !== query[key]) {
+              return false;
+            }
           }
         }
       }
