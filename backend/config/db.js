@@ -87,6 +87,7 @@ async function initDb() {
             _id TEXT PRIMARY KEY,
             data JSONB NOT NULL
           );
+          ALTER TABLE users ENABLE ROW LEVEL SECURITY;
         `);
 
         await pool.query(`
@@ -94,6 +95,7 @@ async function initDb() {
             _id TEXT PRIMARY KEY,
             data JSONB NOT NULL
           );
+          ALTER TABLE products ENABLE ROW LEVEL SECURITY;
         `);
 
         await pool.query(`
@@ -101,6 +103,7 @@ async function initDb() {
             _id TEXT PRIMARY KEY,
             data JSONB NOT NULL
           );
+          ALTER TABLE rentals ENABLE ROW LEVEL SECURITY;
         `);
 
         await pool.query(`
@@ -108,9 +111,10 @@ async function initDb() {
             _id TEXT PRIMARY KEY,
             data JSONB NOT NULL
           );
+          ALTER TABLE maintenance_requests ENABLE ROW LEVEL SECURITY;
         `);
 
-        console.log('⚡ Supabase PostgreSQL tables initialized successfully');
+        console.log('⚡ Supabase PostgreSQL tables initialized with RLS enabled successfully');
 
         // Check if products table has less than 100 products and auto-populate 104 products
         const countRes = await pool.query('SELECT COUNT(*) FROM products');
