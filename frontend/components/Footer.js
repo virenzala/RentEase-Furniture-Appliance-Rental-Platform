@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Logo from './Logo';
 
 export default function Footer() {
   return (
@@ -9,14 +10,9 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
         {/* Brand Information */}
         <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-teal-500 flex items-center justify-center text-white font-bold shadow-md shadow-teal-500/20">
-              RE
-            </div>
-            <span className="font-outfit font-extrabold text-xl tracking-tight text-white">
-              RentEase
-            </span>
-          </div>
+          <Link href="/">
+            <Logo size="md" />
+          </Link>
           <p className="text-sm text-slate-400 leading-relaxed">
             Beautifully designed homes, unlocked with smart furniture and appliance leasing. Live flexible, live premium, live smart.
           </p>

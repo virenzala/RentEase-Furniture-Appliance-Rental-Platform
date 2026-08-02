@@ -18,7 +18,8 @@ import {
   AlertCircle,
   FileText,
   UserCheck,
-  Camera
+  Camera,
+  Upload
 } from 'lucide-react';
 
 const PRESETS = [
@@ -48,6 +49,24 @@ export default function ProfilePage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [customAvatarToggle, setCustomAvatarToggle] = useState(false);
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'File size exceeds 5MB limit. Please choose a smaller image.' });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setAvatar(event.target.result);
+      setCustomAvatarToggle(false);
+      setMessage({ type: 'success', text: 'Picture selected from PC! Click "Save Changes" to save.' });
+    };
+    reader.readAsDataURL(file);
+  };
 
   async function fetchProfile() {
     setLoading(true);
@@ -251,6 +270,18 @@ export default function ProfilePage() {
                     </button>
                   ))}
                   
+                  {/* Upload from PC Button */}
+                  <label className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white font-bold text-xs rounded-full shadow-md shadow-teal-500/20 cursor-pointer hover:scale-105 transition-all">
+                    <Upload className="w-4 h-4" />
+                    <span>Choose from PC</span>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleFileUpload} 
+                      className="hidden" 
+                    />
+                  </label>
+
                   {/* Custom Toggle Button */}
                   <button
                     type="button"

@@ -16,6 +16,8 @@ import {
   Calendar 
 } from 'lucide-react';
 
+import Logo from './Logo';
+
 export default function Header() {
   const pathname = usePathname();
   const { itemCount } = useCart();
@@ -37,9 +39,24 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Monitor auth changes on path navigation
+  // Monitor auth changes on path navigation or storage update
   useEffect(() => {
-    setUser(authService.getCurrentUser());
+    const loadUser = async () => {
+      const cachedUser = authService.getCurrentUser();
+      setUser(cachedUser);
+      if (cachedUser) {
+        try {
+          const freshProfile = await authService.getProfile();
+          setUser(freshProfile);
+          localStorage.setItem('rentease_user', JSON.stringify(freshProfile));
+        } catch (e) {
+          // Keep cached user if offline
+        }
+      }
+    };
+    loadUser();
+    window.addEventListener('storage', loadUser);
+    return () => window.removeEventListener('storage', loadUser);
   }, [pathname]);
 
   const handleLogout = () => {
@@ -66,13 +83,8 @@ export default function Header() {
     }`}>
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-600 flex items-center justify-center text-white font-bold shadow-md shadow-teal-500/20">
-            RE
-          </div>
-          <span className="font-outfit font-extrabold text-2xl tracking-tight bg-gradient-to-r from-slate-900 to-teal-700 dark:from-white dark:to-teal-400 bg-clip-text text-transparent">
-            RentEase
-          </span>
+        <Link href="/">
+          <Logo size="md" />
         </Link>
 
         {/* Desktop Navigation Links */}
@@ -111,20 +123,41 @@ export default function Header() {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center gap-2 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-slate-200 dark:border-slate-700"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-teal-500 to-indigo-500 text-white font-bold flex items-center justify-center text-sm shadow-inner">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
+                {user.avatar ? (
+                  <img 
+                    src={user.avatar} 
+                    alt={user.name} 
+                    className="w-8 h-8 rounded-full object-cover shadow-inner border border-slate-200 dark:border-slate-700"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-teal-500 to-indigo-500 text-white font-bold flex items-center justify-center text-sm shadow-inner">
+                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                )}
                 <span className="text-sm font-semibold max-w-[120px] truncate text-slate-700 dark:text-slate-200 pr-2">
-                  {user.name.split(' ')[0]}
+                  {user.name ? user.name.split(' ')[0] : 'Account'}
                 </span>
               </button>
 
               {dropdownOpen && (
                 <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 p-2 z-50">
-                  <div className="px-3 py-2.5 border-b border-slate-100 dark:border-slate-700 mb-2">
-                    <p className="text-xs text-slate-400">Signed in as</p>
-                    <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{user.email}</p>
-                    <p className="text-[10px] uppercase font-extrabold tracking-wider text-teal-600 mt-0.5">{user.role}</p>
+                  <div className="px-3 py-2.5 border-b border-slate-100 dark:border-slate-700 mb-2 flex items-center gap-3">
+                    {user.avatar ? (
+                      <img 
+                        src={user.avatar} 
+                        alt={user.name} 
+                        className="w-10 h-10 rounded-full object-cover shadow-sm border border-slate-200 dark:border-slate-700 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-teal-500 to-indigo-500 text-white font-bold flex items-center justify-center text-base shrink-0">
+                        {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                      </div>
+                    )}
+                    <div className="overflow-hidden">
+                      <p className="text-xs text-slate-400">Signed in as</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{user.email}</p>
+                      <p className="text-[10px] uppercase font-extrabold tracking-wider text-teal-600 mt-0.5">{user.role}</p>
+                    </div>
                   </div>
 
                   {(user.role === 'admin' || user.role === 'vendor') && (
@@ -214,12 +247,20 @@ export default function Header() {
           {user ? (
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-teal-600 text-white font-bold flex items-center justify-center">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-900 dark:text-white">{user.name}</h4>
-                  <p className="text-xs text-slate-500">{user.email}</p>
+                {user.avatar ? (
+                  <img 
+                    src={user.avatar} 
+                    alt={user.name} 
+                    className="w-10 h-10 rounded-full object-cover shadow-sm border border-slate-200 dark:border-slate-700 shrink-0"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-teal-600 text-white font-bold flex items-center justify-center shrink-0">
+                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                )}
+                <div className="overflow-hidden">
+                  <h4 className="font-bold text-slate-900 dark:text-white truncate">{user.name}</h4>
+                  <p className="text-xs text-slate-500 truncate">{user.email}</p>
                 </div>
               </div>
               
