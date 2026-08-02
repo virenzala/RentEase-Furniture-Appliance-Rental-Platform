@@ -34,6 +34,8 @@ const tableMap = {
   maintenanceRequests: 'maintenance_requests'
 };
 
+const defaultSeedData = require('../data/db.json');
+
 // In-memory cache fallback for serverless/read-only environments
 let memoryDb = null;
 
@@ -44,19 +46,18 @@ function readLocalDb() {
   try {
     if (fs.existsSync(DB_FILE)) {
       const content = fs.readFileSync(DB_FILE, 'utf-8');
-      memoryDb = JSON.parse(content);
-      return memoryDb;
-    }
-    if (fs.existsSync(BUNDLED_DB_FILE)) {
-      const content = fs.readFileSync(BUNDLED_DB_FILE, 'utf-8');
-      memoryDb = JSON.parse(content);
-      return memoryDb;
+      const parsed = JSON.parse(content);
+      if (parsed && Array.isArray(parsed.products) && parsed.products.length > 0) {
+        memoryDb = parsed;
+        return memoryDb;
+      }
     }
   } catch (e) {
-    console.warn('Error reading local DB:', e.message);
+    console.warn('Error reading local DB file:', e.message);
   }
   
-  memoryDb = { users: [], products: [], rentals: [], maintenanceRequests: [] };
+  // Always fallback to bundled seed data if DB_FILE is missing or empty
+  memoryDb = JSON.parse(JSON.stringify(defaultSeedData));
   return memoryDb;
 }
 
