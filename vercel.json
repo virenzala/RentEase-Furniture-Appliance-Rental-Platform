@@ -10,21 +10,21 @@
       "use": "@vercel/next"
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/:path*",
-      "destination": "backend/server.js"
+      "src": "/api/(.*)",
+      "dest": "backend/server.js"
     },
     {
-      "source": "/",
-      "destination": "frontend"
+      "handle": "filesystem"
     },
     {
-      "source": "/:path*",
-      "destination": "frontend/:path*"
+      "src": "/(.*)",
+      "dest": "frontend/$1"
     }
   ]
 }
+
 
 
 
