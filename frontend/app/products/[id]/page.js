@@ -76,7 +76,8 @@ export default function ProductDetails({ params }) {
   // Live financial aggregates
   const monthlyCost = product.monthlyRent;
   const depositCost = product.securityDeposit;
-  const calculatedTotal = (monthlyCost * selectedTenure) + depositCost;
+  const initialCheckoutTotal = monthlyCost + depositCost;
+  const totalContractValue = (monthlyCost * selectedTenure) + depositCost;
 
   // Check if item is already added to cart
   const inCart = cartItems.some((item) => item.product._id === product._id);
@@ -229,14 +230,21 @@ export default function ProductDetails({ params }) {
               </div>
               <div className="h-px bg-slate-200 dark:bg-slate-700 my-1" />
               <div className="flex justify-between items-center">
-                <span className="text-sm font-bold text-slate-900 dark:text-white">Est. Checkout Initial Total</span>
-                <span className="text-2xl font-extrabold text-slate-900 dark:text-white">
-                  ${calculatedTotal}
+                <div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">Est. Initial Due at Checkout</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5 font-medium">1st Month Rent + Refundable Deposit</p>
+                </div>
+                <span className="text-2xl font-extrabold text-teal-600 dark:text-teal-400">
+                  ${initialCheckoutTotal}
                 </span>
               </div>
+              <div className="flex justify-between items-center text-xs text-slate-500 pt-1">
+                <span>Total Contract Value ({selectedTenure} Mo)</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">${totalContractValue}</span>
+              </div>
               <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-1 font-semibold">
-                <Info className="w-3.5 h-3.5 text-teal-500" />
-                Includes fully refundable ${depositCost} deposit. Shipping costs computed in cart.
+                <Info className="w-3.5 h-3.5 text-teal-500 shrink-0" />
+                Includes Month 1 rent + fully refundable ${depositCost} deposit. Shipping computed in cart.
               </p>
             </div>
           </div>
