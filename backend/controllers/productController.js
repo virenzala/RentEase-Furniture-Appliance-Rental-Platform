@@ -9,26 +9,30 @@ const getProducts = async (req, res) => {
 
     let products = await Product.find();
 
-    if (!Array.isArray(products)) {
-      products = [];
+    if (!Array.isArray(products) || products.length === 0) {
+      const { readDb } = require('../config/db');
+      const fallbackDb = readDb();
+      products = (fallbackDb && Array.isArray(fallbackDb.products)) ? fallbackDb.products : [];
     }
 
     // 1. Filter by category
     if (category && category !== 'all') {
-      products = products.filter(p => p && p.category && p.category.toLowerCase() === category.toLowerCase());
+      const catLower = String(category).toLowerCase();
+      products = products.filter(p => p && p.category && String(p.category).toLowerCase() === catLower);
     }
 
     // 2. Filter by city
     if (city && city !== 'all') {
-      products = products.filter(p => p && p.city && p.city.toLowerCase() === city.toLowerCase());
+      const cityLower = String(city).toLowerCase();
+      products = products.filter(p => p && p.city && String(p.city).toLowerCase() === cityLower);
     }
 
     // 3. Keyword Search (title & description)
     if (search) {
-      const term = search.toLowerCase();
+      const term = String(search).toLowerCase();
       products = products.filter(p => 
-        p && ((p.title && p.title.toLowerCase().includes(term)) || 
-        (p.description && p.description.toLowerCase().includes(term)))
+        p && ((p.title && String(p.title).toLowerCase().includes(term)) || 
+        (p.description && String(p.description).toLowerCase().includes(term)))
       );
     }
 
@@ -54,7 +58,13 @@ const getProducts = async (req, res) => {
     res.json(products);
   } catch (error) {
     console.error('Fetch products failed:', error);
-    res.status(500).json({ message: 'Server error fetching products' });
+    try {
+      const { readDb } = require('../config/db');
+      const db = readDb();
+      return res.json(db.products || []);
+    } catch (e) {
+      res.status(500).json({ message: 'Server error fetching products' });
+    }
   }
 };
 

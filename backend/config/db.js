@@ -194,24 +194,28 @@ class Model {
       items = db[this.collectionName] || [];
     }
 
-    // Perform in-memory filter matching original behavior
-    return items.filter(item => {
+    // Perform in-memory filter matching original behavior safely
+    return (items || []).filter(item => {
+      if (!item) return false;
       for (const key in query) {
         if (query[key] !== undefined) {
-          if (Array.isArray(query[key])) {
-            if (!query[key].includes(item[key])) return false;
-          } else if (typeof query[key] === 'object' && query[key] !== null) {
-            const operator = Object.keys(query[key])[0];
-            const value = query[key][operator];
+          const itemVal = item[key];
+          const queryVal = query[key];
+
+          if (Array.isArray(queryVal)) {
+            if (!queryVal.includes(itemVal)) return false;
+          } else if (typeof queryVal === 'object' && queryVal !== null) {
+            const operator = Object.keys(queryVal)[0];
+            const value = queryVal[operator];
             if (operator === '$in') {
-              if (!value.includes(item[key])) return false;
+              if (!Array.isArray(value) || !value.includes(itemVal)) return false;
             } else if (operator === '$ne') {
-              if (item[key] === value) return false;
+              if (itemVal === value) return false;
             }
           } else {
-            if (typeof item[key] === 'string' && typeof query[key] === 'string') {
-              if (item[key].trim().toLowerCase() !== query[key].trim().toLowerCase()) return false;
-            } else if (item[key] !== query[key]) {
+            if (typeof itemVal === 'string' && typeof queryVal === 'string') {
+              if (itemVal.trim().toLowerCase() !== queryVal.trim().toLowerCase()) return false;
+            } else if (itemVal !== queryVal) {
               return false;
             }
           }
