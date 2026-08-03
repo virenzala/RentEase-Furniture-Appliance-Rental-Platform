@@ -18,12 +18,20 @@ const isPgConfigured = Boolean(
 
 let pool = null;
 if (isPgConfigured) {
-  pool = new Pool({
-    connectionString: connectionString,
-    ssl: {
-      rejectUnauthorized: false
-    }
-  });
+  try {
+    pool = new Pool({
+      connectionString: connectionString,
+      ssl: {
+        rejectUnauthorized: false
+      }
+    });
+    pool.on('error', (err) => {
+      console.warn('⚠️ Unexpected PG pool background error:', err.message);
+    });
+  } catch (e) {
+    console.warn('⚠️ PG Pool creation failed, using local datastore:', e.message);
+    pool = null;
+  }
 }
 
 // Map model collection names to postgres table names
