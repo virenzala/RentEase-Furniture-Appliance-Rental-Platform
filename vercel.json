@@ -16,6 +16,10 @@
       "dest": "/api/index.js"
     },
     {
+      "src": "/products/([^/]+)",
+      "dest": "/frontend/products/[id]"
+    },
+    {
       "src": "/(.*)",
       "dest": "/frontend/$1"
     }
