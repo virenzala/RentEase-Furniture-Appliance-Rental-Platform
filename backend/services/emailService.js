@@ -19,30 +19,13 @@ async function getTransporter() {
     });
     console.log(`✉️ Mailer initialized with custom SMTP server: ${host}`);
   } else {
-    console.log(`✉️ SMTP variables missing. Creating dynamic Ethereal Mail testing account...`);
-    try {
-      const testAccount = await nodemailer.createTestAccount();
-      transporter = nodemailer.createTransport({
-        host: testAccount.smtp.host,
-        port: testAccount.smtp.port,
-        secure: testAccount.smtp.secure,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass
-        }
-      });
-      console.log(`✉️ Dynamic Ethereal account created successfully: ${testAccount.user}`);
-      process.env.SMTP_FROM = `"RentEase Sandbox" <${testAccount.user}>`;
-    } catch (err) {
-      console.error('❌ Failed to create Ethereal Mail account:', err);
-      // fallback to silent mock logger transport
-      transporter = {
-        sendMail: async (mailOptions) => {
-          console.log('✉️ [Mock Mailer Send]', mailOptions.to, mailOptions.subject);
-          return { messageId: 'mock-id' };
-        }
-      };
-    }
+    console.log(`✉️ Using safe mock mailer for serverless production deployment.`);
+    transporter = {
+      sendMail: async (mailOptions) => {
+        console.log('✉️ [Mock Mailer Send]', mailOptions.to, mailOptions.subject);
+        return { messageId: 'mock-id-' + Date.now() };
+      }
+    };
   }
   return transporter;
 }
