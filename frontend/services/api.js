@@ -23,6 +23,8 @@ api.interceptors.request.use(
   (error) => {
     return Promise.reject(error);
   }
+);
+
 // Response interceptor to handle 401 unauth token invalidation cleanly
 api.interceptors.response.use(
   (response) => response,
