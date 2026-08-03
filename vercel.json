@@ -16,10 +16,15 @@
       "destination": "backend/server.js"
     },
     {
+      "source": "/",
+      "destination": "frontend"
+    },
+    {
       "source": "/:path*",
       "destination": "frontend/:path*"
     }
   ]
 }
+
 
 
