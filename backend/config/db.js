@@ -97,6 +97,12 @@ async function initDb() {
         console.log('🔄 Initializing Supabase PostgreSQL tables...');
         
         await pool.query(`
+          CREATE SCHEMA IF NOT EXISTS supabase_migrations;
+          CREATE TABLE IF NOT EXISTS supabase_migrations.schema_migrations (
+            version TEXT PRIMARY KEY,
+            statements TEXT[],
+            name TEXT
+          );
           CREATE TABLE IF NOT EXISTS users (
             _id TEXT PRIMARY KEY,
             data JSONB NOT NULL
