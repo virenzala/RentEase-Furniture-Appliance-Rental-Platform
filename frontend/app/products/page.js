@@ -30,7 +30,7 @@ function ProductsListingContent() {
   const [category, setCategory] = useState(initialCategory);
   const [city, setCity] = useState(initialCity);
   const [minRent, setMinRent] = useState(0);
-  const [maxRent, setMaxRent] = useState(200);
+  const [maxRent, setMaxRent] = useState(500);
   const [sort, setSort] = useState('newest');
 
   // Sync URL search parameters with state
@@ -53,7 +53,7 @@ function ProductsListingContent() {
           city: city !== 'all' ? city : undefined,
           search: search.trim() ? search.trim() : undefined,
           minRent: minRent > 0 ? minRent : undefined,
-          maxRent: maxRent < 200 ? maxRent : undefined,
+          maxRent: maxRent < 500 ? maxRent : undefined,
           sort
         };
         const data = await productService.getAll(filters);
@@ -79,7 +79,7 @@ function ProductsListingContent() {
     setCategory('all');
     setCity('all');
     setMinRent(0);
-    setMaxRent(200);
+    setMaxRent(500);
     setSort('newest');
     router.push('/products');
   };
@@ -177,7 +177,7 @@ function ProductsListingContent() {
               <input 
                 type="range"
                 min="0"
-                max="200"
+                max="500"
                 value={maxRent}
                 onChange={(e) => setMaxRent(Number(e.target.value))}
                 className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-teal-600"

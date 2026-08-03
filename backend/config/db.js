@@ -79,8 +79,8 @@ async function initDb() {
   if (initPromise) return initPromise;
   
   initPromise = (async () => {
-    if (isPgConfigured && pool) {
-      try {
+    try {
+      if (isPgConfigured && pool) {
         console.log('🔄 Initializing Supabase PostgreSQL tables...');
         
         await pool.query(`
@@ -143,12 +143,12 @@ async function initDb() {
           }
           console.log('🎉 Supabase PostgreSQL auto-seeded 104 products successfully!');
         }
-      } catch (err) {
-        console.warn('⚠️ Supabase PG connection failed, falling back to local JSON database:', err.message);
+      } else {
+        console.log('📂 Using Local JSON Datastore (backend/data/db.json)');
         readLocalDb();
       }
-    } else {
-      console.log('📂 Using Local JSON Datastore (backend/data/db.json)');
+    } catch (err) {
+      console.warn('⚠️ Supabase PG connection failed, falling back to local JSON database:', err.message);
       readLocalDb();
     }
   })();
@@ -158,7 +158,7 @@ async function initDb() {
 
 // Trigger initial setup
 initDb().catch(err => {
-  console.warn('Initial DB setup completed with fallback mode.');
+  console.warn('Initial DB setup completed with fallback mode:', err.message);
 });
 
 // Mongoose-like Model simulator (supports Supabase PostgreSQL & Local JSON datastore)
@@ -173,7 +173,12 @@ class Model {
   }
 
   async find(query = {}) {
-    await initDb();
+    try {
+      await initDb();
+    } catch (e) {
+      console.warn('DB init error, proceeding with local fallback:', e.message);
+    }
+    
     let items = [];
     
     if (isPgConfigured && pool) {
@@ -217,14 +222,18 @@ class Model {
   }
 
   async findOne(query = {}) {
-    await initDb();
+    try {
+      await initDb();
+    } catch (e) {}
     const items = await this.find(query);
     return items[0] || null;
   }
 
   async findById(id) {
     if (!id) return null;
-    await initDb();
+    try {
+      await initDb();
+    } catch (e) {}
     
     if (isPgConfigured && pool) {
       try {
