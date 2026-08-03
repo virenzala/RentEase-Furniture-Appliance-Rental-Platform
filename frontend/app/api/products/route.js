@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import seedDb from '../../data/db.json';
+import seedDb from '@/data/db.json';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
   try {
