@@ -23,14 +23,14 @@ const rentalRoutes = require('./routes/rentalRoutes');
 const maintenanceRoutes = require('./routes/maintenanceRoutes');
 const { checkDbHealth } = require('./config/db');
 
-// Mount API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/rentals', rentalRoutes);
-app.use('/api/maintenance', maintenanceRoutes);
+// Mount API Routes (Support both /api/* and /* for serverless rewrites)
+app.use(['/api/auth', '/auth'], authRoutes);
+app.use(['/api/products', '/products'], productRoutes);
+app.use(['/api/rentals', '/rentals'], rentalRoutes);
+app.use(['/api/maintenance', '/maintenance'], maintenanceRoutes);
 
 // Health check endpoint
-app.get('/api/health', async (req, res) => {
+app.get(['/api/health', '/health'], async (req, res) => {
   const dbHealth = await checkDbHealth();
   res.json({
     status: dbHealth.connected ? 'healthy' : 'degraded',
@@ -47,17 +47,16 @@ app.get('/api/health', async (req, res) => {
 
 // Serve frontend build static files in production if needed, or fallback error
 app.use((req, res, next) => {
-  const error = new Error(`Not Found - ${req.originalUrl}`);
   res.status(404);
+  const error = new Error(`Not Found - ${req.originalUrl}`);
   next(error);
 });
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  res.status(statusCode);
-  res.json({
-    message: err.message,
+  const statusCode = (res.statusCode && res.statusCode !== 200) ? res.statusCode : 500;
+  res.status(statusCode).json({
+    message: err.message || 'Server error',
     stack: process.env.NODE_ENV === 'production' ? null : err.stack
   });
 });
