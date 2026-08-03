@@ -12,9 +12,14 @@
   ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/:path*",
       "destination": "backend/server.js"
+    },
+    {
+      "source": "/:path*",
+      "destination": "frontend/:path*"
     }
   ]
 }
+
 
