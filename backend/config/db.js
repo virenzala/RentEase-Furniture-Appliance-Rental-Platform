@@ -41,7 +41,9 @@ let memoryDb = null;
 
 // Local JSON DB Helper
 function readLocalDb() {
-  if (memoryDb) return memoryDb;
+  if (memoryDb && Array.isArray(memoryDb.products) && memoryDb.products.length > 0) {
+    return memoryDb;
+  }
   
   try {
     if (fs.existsSync(DB_FILE)) {
@@ -56,8 +58,11 @@ function readLocalDb() {
     console.warn('Error reading local DB file:', e.message);
   }
   
-  // Always fallback to bundled seed data if DB_FILE is missing or empty
-  memoryDb = JSON.parse(JSON.stringify(defaultSeedData));
+  try {
+    memoryDb = defaultSeedData || { users: [], products: [], rentals: [], maintenanceRequests: [] };
+  } catch (e) {
+    memoryDb = { users: [], products: [], rentals: [], maintenanceRequests: [] };
+  }
   return memoryDb;
 }
 
