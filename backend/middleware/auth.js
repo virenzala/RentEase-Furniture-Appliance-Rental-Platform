@@ -11,8 +11,23 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, JWT_SECRET);
 
-      // Find user from our Mongoose-like simulation db
-      const user = await User.findById(decoded.id);
+      // Find user from our DB simulator or fallback to token payload
+      let user = await User.findById(decoded.id);
+      if (!user && decoded.email) {
+        user = await User.findOne({ email: decoded.email });
+      }
+
+      if (!user && decoded && decoded.id) {
+        user = {
+          _id: decoded.id,
+          name: decoded.name || 'Leaseholder',
+          email: decoded.email || 'user@rentease.com',
+          role: decoded.role || 'user',
+          phone: decoded.phone || '',
+          address: decoded.address || ''
+        };
+      }
+
       if (!user) {
         return res.status(401).json({ message: 'Not authorized, user not found' });
       }

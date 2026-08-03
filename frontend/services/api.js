@@ -23,6 +23,19 @@ api.interceptors.request.use(
   (error) => {
     return Promise.reject(error);
   }
+// Response interceptor to handle 401 unauth token invalidation cleanly
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401 && typeof window !== 'undefined') {
+      const msg = error.response.data?.message || '';
+      if (msg.includes('user not found') || msg.includes('token failed')) {
+        localStorage.removeItem('rentease_token');
+        localStorage.removeItem('rentease_user');
+      }
+    }
+    return Promise.reject(error);
+  }
 );
 
 // Unified Auth services

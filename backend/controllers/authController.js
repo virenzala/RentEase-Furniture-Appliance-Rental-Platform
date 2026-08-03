@@ -5,8 +5,11 @@ const { JWT_SECRET } = require('../middleware/auth');
 const emailService = require('../services/emailService');
 
 // Generate JWT Token
-const generateToken = (id) => {
-  return jwt.sign({ id }, JWT_SECRET, { expiresIn: '30d' });
+const generateToken = (user) => {
+  const payload = typeof user === 'object' && user !== null
+    ? { id: user._id, email: user.email, name: user.name, role: user.role, phone: user.phone || '', address: user.address || '' }
+    : { id: user };
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '30d' });
 };
 
 // @desc    Register a new user
@@ -60,7 +63,7 @@ const registerUser = async (req, res) => {
       bio: newUser.bio,
       gender: newUser.gender,
       dob: newUser.dob,
-      token: generateToken(newUser._id)
+      token: generateToken(newUser)
     });
   } catch (error) {
     console.error('Registration failed:', error);
@@ -101,7 +104,7 @@ const loginUser = async (req, res) => {
       bio: user.bio || '',
       gender: user.gender || '',
       dob: user.dob || '',
-      token: generateToken(user._id)
+      token: generateToken(user)
     });
   } catch (error) {
     console.error('Login failed:', error);
