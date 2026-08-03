@@ -2,6 +2,7 @@ import './globals.css';
 import { CartProvider } from '../hooks/useCart';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata = {
   title: 'RentEase - Premium Furniture & Appliance Rentals',
@@ -27,7 +28,9 @@ export default function RootLayout({ children }) {
             <Footer />
           </div>
         </CartProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
 }
+
